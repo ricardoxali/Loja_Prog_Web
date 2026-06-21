@@ -7,7 +7,7 @@
 {% block content %}
 <div id="content">
     <div class="container">
-        <form method="POST" action= "/produto/edit" >
+        <form method="POST" enctype="multipart/form-data" action= "/produto/edit" >
             {% csrf_token %}
             <div class="row">
                 <input type="hidden" value="{{produto.id}}" name="id">
@@ -63,6 +63,15 @@
                         {% endif %}
                     {% endfor %}
                 </select>
+            </div>
+            <div class="row mt-2">
+                <label>
+                    <input type="checkbox" name="deletar" value="1">
+                    Deletar imagem
+                </label>
+            </div>            
+            <div class="row mt-2">
+                <input type="file" name="image">
             </div>
             <div class="row">
                 <button type="submit" class="btn btn-danger col-md-2 mt-3 mr-2"><i class="fa fa-check"></i> Salvar</button>
