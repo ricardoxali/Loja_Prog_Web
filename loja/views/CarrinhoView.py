@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
+@login_required
 def create_carrinhoitem_view(request, produto_id=None):
     print('create_carrinhoitem_view')
     produto = get_object_or_404(Produto, pk=produto_id)
@@ -55,23 +56,51 @@ def create_carrinhoitem_view(request, produto_id=None):
     print('item de carrinho salvo: ' + str(carrinho_item.id))
     return redirect('/carrinho')
 
-def list_carrinho_view(request):
-    print ('list_carrinho_view')
-    carrinho = None
+def aumentar_quantidade_view(request, item_id):
+    item = get_object_or_404(CarrinhoItem, id=item_id)
     carrinho_id = request.session.get('carrinho_id')
+
+    if carrinho_id == item.carrinho.id:
+        item.quantidade += 1
+        item.save()
+
+    return redirect('/carrinho')
+
+def diminuir_quantidade_view(request, item_id):
+    item = get_object_or_404(CarrinhoItem, id=item_id)
+
+    carrinho_id = request.session.get('carrinho_id')
+
+    if carrinho_id == item.carrinho.id:
+        if item.quantidade > 1:
+            item.quantidade -= 1
+            item.save()
+        else:
+            item.delete()
+
+    return redirect('/carrinho')
+
+def list_carrinho_view(request):
+    print('list_carrinho_view')
+    carrinho = None
+    carrinho_item = None
+    carrinho_id = request.session.get('carrinho_id')
+
     if carrinho_id:
-        print ('carrinho: ' + str(carrinho_id))
+        print('carrinho: ' + str(carrinho_id))
         carrinho = Carrinho.objects.filter(id=carrinho_id).first()
-        print ('Data do carrinho' + str(carrinho.criado_em) )
-        carrinho_item = None
-        carrinho_item = CarrinhoItem.objects.filter(carrinho_id=carrinho_id)
-        if carrinho_item:
-            print ('itens de carrinho encontrado: ' + str(carrinho_item))
+        if carrinho:
+            print('Data do carrinho: ' + str(carrinho.criado_em))
+            carrinho_item = CarrinhoItem.objects.filter(
+                carrinho_id=carrinho_id
+            )
+            if carrinho_item:
+                print('itens de carrinho encontrado: ' + str(carrinho_item))
     context = {
         'carrinho': carrinho,
         'itens': carrinho_item
     }
-    return render(request, 'carrinho/carrinho-listar.html', context=context)
+    return render(request, 'carrinho/carrinho-listar.html', context)
 
 @login_required
 def confirmar_carrinho_view(request):
@@ -81,6 +110,7 @@ def confirmar_carrinho_view(request):
     if carrinho_id:
         print ('carrinho: ' + str(carrinho_id))
         carrinho = Carrinho.objects.filter(id=carrinho_id).first()
+        itens = CarrinhoItem.objects.filter(carrinho=carrinho)
         usuario = get_object_or_404(Usuario, user=request.user)
         print ('Usuario: ' + str(usuario))
         if usuario:
@@ -89,8 +119,10 @@ def confirmar_carrinho_view(request):
             carrinho.confirmado_em = timezone.make_aware(datetime.today())
             carrinho.save()
             print ('carrinho salvo')
+
     context = {
-        'carrinho': carrinho
+        'carrinho': carrinho,
+        'itens': itens
     }
     return render(request, 'carrinho/carrinho-confirmado.html', context=context)
 

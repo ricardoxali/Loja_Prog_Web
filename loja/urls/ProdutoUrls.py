@@ -1,5 +1,5 @@
 from django.urls import path
-from loja.views.ProdutoView import list_produto_view, edit_produto_view, edit_produto_postback, details_produto_view, delete_produto_view, delete_produto_postback, create_produto_view
+from loja.views.ProdutoView import * 
 
 urlpatterns = [
     path("", list_produto_view, name='produto'),
@@ -10,4 +10,6 @@ urlpatterns = [
     path("delete/<int:id>", delete_produto_view, name='delete_produto'),
     path("delete", delete_produto_postback, name='delete_produto_postback'),
     path("create", create_produto_view, name= 'create_produto'),
+    path("favoritar/<int:id>", favoritar_produto_view, name='favoritar_produto'),
+    path("favoritos", listar_favoritos_view, name='listar_favoritos'),
 ]

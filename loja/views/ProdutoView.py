@@ -1,11 +1,11 @@
-from loja.models import Produto, Fabricante, Categoria
+from loja.models import Produto, Fabricante, Categoria, Usuario
+from django.shortcuts import render, redirect, get_object_or_404
 from datetime import timedelta
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
-@login_required
 
+@login_required
 def list_produto_view(request, id=None):
     produto = request.GET.get("produto")
     destaque = request.GET.get("destaque")
@@ -177,3 +177,25 @@ def create_produto_view(request, id=None):
         return redirect("/produto")
     context = {'fabricantes':fabricantes, 'categorias':categorias}
     return render(request, template_name='produto/produto-create.html', status=200, context=context)
+
+@login_required
+def favoritar_produto_view(request, id):
+    produto = get_object_or_404(Produto, id=id)
+    usuario = get_object_or_404(Usuario, user=request.user)
+
+    if produto in usuario.favoritos.all():
+        usuario.favoritos.remove(produto)
+    else:
+        usuario.favoritos.add(produto)
+
+    return redirect('home')
+
+@login_required
+def listar_favoritos_view(request):
+    usuario = get_object_or_404(Usuario, user=request.user)
+    produtos = usuario.favoritos.all()
+
+    context = {
+        'produtos': produtos
+    }
+    return render(request, 'produto/produto-favoritos.html', context=context)

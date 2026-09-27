@@ -6,6 +6,7 @@ class Usuario(models.Model):
     criado_em = models.DateTimeField(auto_now_add=True)
     alterado_em = models.DateTimeField(auto_now=True)
     token = models.CharField(max_length=255, null=True, blank=True)
+    favoritos = models.ManyToManyField(Produto, blank=True, related_name='favoritado_por')
     def __str__(self):
         return '{}'.format(self.user.username)
     @receiver(post_save, sender=User)
