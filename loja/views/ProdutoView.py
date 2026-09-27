@@ -1,8 +1,10 @@
 from loja.models import Produto, Fabricante, Categoria
 from datetime import timedelta
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
+@login_required
 
 def list_produto_view(request, id=None):
     produto = request.GET.get("produto")
